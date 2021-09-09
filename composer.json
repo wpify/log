@@ -1,6 +1,6 @@
 {
-    "name": "wpify/tracy",
-    "description": "WPify Tracy",
+    "name": "wpify/log",
+    "description": "WPify Log",
     "type": "library",
     "license": "GPL-2.0-or-later",
     "autoload": {
