@@ -2,7 +2,7 @@
 
 namespace Wpify\Log;
 
-use Monolog\Handler\AbstractHandler;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 
 class Log {
@@ -56,7 +56,11 @@ class Log {
 	 */
 	public const EMERGENCY = 600;
 
-	public function __construct( string $channel, array $handlers ) {
+	/**
+	 * @param string $channel
+	 * @param array $handlers
+	 */
+	public function __construct( string $channel, array $handlers = [] ) {
 		$this->channel  = $channel;
 		$this->handlers = $handlers;
 		$this->logger   = new Logger( $this->channel );
@@ -162,4 +166,21 @@ class Log {
 		$this->logger->emergency( $message, $data );
 	}
 
+	/**
+	 * @return string
+	 */
+	public function get_channel(): string {
+		return $this->channel;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function get_handlers(): array {
+		return $this->handlers;
+	}
+
+	public function push_handler( HandlerInterface $handler ) {
+		$this->logger->pushHandler( $handler );
+	}
 }
