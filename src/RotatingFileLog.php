@@ -17,7 +17,11 @@ class RotatingFileLog extends Log {
 		if ( ! $path ) {
 			$dir  = wp_get_upload_dir();
 			$path = trailingslashit( $dir['basedir'] ) . 'logs' . DIRECTORY_SEPARATOR . $filename;
-			$path = sprintf( '%s_%s.log', $path, hash( 'md5', $channel ) );
+			$key  = $channel;
+			if ( defined( 'NONCE_KEY' ) ) {
+				$key = $channel . NONCE_KEY;
+			}
+			$path = sprintf( '%s_%s.log', $path, hash( 'md5', $key ) );
 		}
 
 		$handler = new RotatingFileHandler( $path );
