@@ -80,7 +80,7 @@ class Log {
 		];
 
 		foreach ( $levels as $level ) {
-			add_action( "wpify_log_{$level}", [ $this, $level ], 10, 2 );
+			add_action( "wpify_log_{$this->channel}_{$level}", [ $this, $level ], 10, 2 );
 		}
 	}
 
