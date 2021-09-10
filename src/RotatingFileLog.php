@@ -5,11 +5,11 @@ namespace Wpify\Log;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\RotatingFileHandler;
-
+use Monolog\Logger;
 class RotatingFileLog extends Log {
 	/**
-	 * @param string $channel
-	 * @param string $path
+	 * @param string                  $channel
+	 * @param string                  $path
 	 * @param FormatterInterface|null $formatter
 	 */
 	public function __construct( string $channel, string $path = '', ?FormatterInterface $formatter = null ) {
@@ -24,7 +24,7 @@ class RotatingFileLog extends Log {
 			$path = sprintf( '%s_%s.log', $path, hash( 'md5', $key ) );
 		}
 
-		$handler = new RotatingFileHandler( $path );
+		$handler = new RotatingFileHandler( $path, 5, Logger::DEBUG, true, 0660 );
 		$handler->setFormatter( $formatter ?? new JsonFormatter() );
 		parent::__construct( $channel, [ $handler ] );
 	}
