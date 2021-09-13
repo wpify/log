@@ -6,8 +6,11 @@ use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 
 class Log {
-	private Logger $logger;
-	private string $channel;
+	/**
+	 * @var Logger
+	 */
+	private $logger;
+	private $channel;
 	private array $handlers;
 
 	/**
@@ -57,8 +60,8 @@ class Log {
 	public const EMERGENCY = 600;
 
 	/**
-	 * @param string $channel
-	 * @param array $handlers
+	 * @param  string  $channel
+	 * @param  array  $handlers
 	 */
 	public function __construct( string $channel, array $handlers = [] ) {
 		$this->channel  = $channel;
@@ -117,7 +120,7 @@ class Log {
 
 	/**
 	 * @param $message
-	 * @param array $data
+	 * @param  array  $data
 	 *
 	 * @return void
 	 */
@@ -127,7 +130,7 @@ class Log {
 
 	/**
 	 * @param $message
-	 * @param array $data
+	 * @param  array  $data
 	 *
 	 * @return void
 	 */
@@ -148,7 +151,7 @@ class Log {
 
 	/**
 	 * @param $message
-	 * @param array $data
+	 * @param  array  $data
 	 *
 	 * @return void
 	 */
@@ -158,7 +161,7 @@ class Log {
 
 	/**
 	 * @param $message
-	 * @param array $data
+	 * @param  array  $data
 	 *
 	 * @return void
 	 */
