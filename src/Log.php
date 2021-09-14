@@ -11,7 +11,7 @@ class Log {
 	 */
 	private $logger;
 	private $channel;
-	private array $handlers;
+	private $handlers;
 
 	/**
 	 * Detailed debug information
