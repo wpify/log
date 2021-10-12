@@ -67,6 +67,7 @@ class Log {
 		$this->channel  = $channel;
 		$this->handlers = $handlers;
 		$this->logger   = new Logger( $this->channel );
+
 		foreach ( $handlers as $handler ) {
 			$this->logger->pushHandler( $handler );
 		}
@@ -85,6 +86,18 @@ class Log {
 		foreach ( $levels as $level ) {
 			add_action( "wpify_log_{$this->channel}_{$level}", [ $this, $level ], 10, 2 );
 		}
+
+		add_filter( 'wpify_logs', function ( $logs ) {
+			$logs[ $this->channel ] = $this->logger;
+
+			return $logs;
+		} );
+
+		if ( ! apply_filters( 'wpify_log_tools_initialized', false ) ) {
+			add_filter( 'wpify_log_tools_initialized', '__return_true' );
+			new Tools();
+		}
+
 	}
 
 	/**

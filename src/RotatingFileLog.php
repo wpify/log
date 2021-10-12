@@ -4,7 +4,6 @@ namespace Wpify\Log;
 
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\JsonFormatter;
-use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 class RotatingFileLog extends Log {
 	/**
