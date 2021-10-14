@@ -32,7 +32,7 @@ class Tools {
                 <select name="log-file" id="log-file" style="max-width: 300px;">
                     <option value=""></option>
 					<?php foreach ( $files as $file ) { ?>
-                        <option value="<?php echo $file; ?>" <?php echo selected( $file, $_GET['log-file'] ); ?>><?php echo basename( $file ); ?></option>
+                    <option value="<?php echo $file; ?>" <?php echo selected( $file, !empty($_GET['log-file']) ? $_GET['log-file'] : '' ); ?>><?php echo basename( $file ); ?></option>
 					<?php } ?>
                 </select>
                 <input type="hidden" name="page" value="wpify-logs"/>
