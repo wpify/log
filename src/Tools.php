@@ -47,17 +47,39 @@ class Tools {
 					_e( 'File not found, cheating, huh?', 'wpify-log' );
 					?></p>
 				<?php
-			} else { ?>
-                <div style="margin-top: 40px; padding: 20px; background: white;">
+			} else {
+				$logs = array_map( function ( $item ) {
+					return json_decode( $item, ARRAY_A );
+				}, file( $_GET['log-file'] ) );
 
-					<?php
-					$logs = file( $_GET['log-file'] );
-					foreach ( $logs as $item ) {
-						echo $item . "<br/>";
+				if ( ! empty( $logs ) ) {
+					$header = [];
+					foreach ( $logs[0] as $key => $item ) {
+						$header[] = $key;
 					}
 					?>
-                </div>
-				<?php
+
+                    <table class="wp-list-table widefat fixed striped table-view-list posts">
+                        <thead>
+                        <tr>
+							<?php foreach ( $header as $item ) { ?>
+                                <th><?php echo $item; ?></th>
+							<?php }
+							?>
+                        </tr>
+                        </thead>
+                        <tbody>
+						<?php foreach ( $logs as $log ) { ?>
+                            <tr>
+								<?php foreach ( $log as $item ) { ?>
+                                    <td><?php echo is_array($item) ? json_encode($item) : $item; ?></td>
+								<?php } ?>
+                            </tr>
+						<?php } ?>
+                        </tbody>
+                    </table>
+					<?php
+				}
 			}
 		}
 	}
