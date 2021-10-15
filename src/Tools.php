@@ -32,7 +32,7 @@ class Tools {
                 <select name="log-file" id="log-file" style="max-width: 300px;">
                     <option value=""></option>
 					<?php foreach ( $files as $file ) { ?>
-                    <option value="<?php echo $file; ?>" <?php echo selected( $file, !empty($_GET['log-file']) ? $_GET['log-file'] : '' ); ?>><?php echo basename( $file ); ?></option>
+                        <option value="<?php echo $file; ?>" <?php echo selected( $file, ! empty( $_GET['log-file'] ) ? $_GET['log-file'] : '' ); ?>><?php echo basename( $file ); ?></option>
 					<?php } ?>
                 </select>
                 <input type="hidden" name="page" value="wpify-logs"/>
@@ -42,15 +42,23 @@ class Tools {
 
 		<?php
 		if ( ! empty( $_GET['log-file'] ) ) {
-			if ( ! in_array( $_GET['log-file'], $files ) ) { ?>
-                <p><?php _e( 'File not found, cheating, huh?', 'wpify-log' ); ?></p>
-			<?php } else { ?>
-                <div style="margin-top: 40px;">
-                    <code>
-						<?php echo file_get_contents( $_GET['log-file'] ); ?>
-                    </code>
+			if ( ! \in_array( $_GET['log-file'], $files ) ) { ?>
+                <p><?php
+					_e( 'File not found, cheating, huh?', 'wpify-log' );
+					?></p>
+				<?php
+			} else { ?>
+                <div style="margin-top: 40px; padding: 20px; background: white;">
+
+					<?php
+					$logs = file( $_GET['log-file'] );
+					foreach ( $logs as $item ) {
+						echo $item . "<br/>";
+					}
+					?>
                 </div>
-			<?php }
+				<?php
+			}
 		}
 	}
 }
