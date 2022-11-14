@@ -8,11 +8,14 @@ class Tools {
 	}
 
 	public function add_menu_page() {
-		add_submenu_page( 'tools.php', __( 'WPify Logs', 'wpify-log' ), __( 'WPify Logs', 'wpify-log' ), 'read', 'wpify-logs', [ $this, 'logs_screen' ] );
+		add_submenu_page( 'tools.php', __( 'WPify Logs', 'wpify-log' ), __( 'WPify Logs', 'wpify-log' ), 'read', 'wpify-logs', [
+			$this,
+			'logs_screen'
+		] );
 	}
 
 	public function logs_screen() {
-		$logs  = apply_filters( 'wpify_logs', [] );
+		$logs = apply_filters( 'wpify_logs', [] );
 		$files = [];
 		foreach ( $logs as $log ) {
 			foreach ( $log->getHandlers() as $handler ) {
@@ -41,8 +44,10 @@ class Tools {
         </div>
 
 		<?php
+
 		if ( ! empty( $_GET['log-file'] ) ) {
-			if ( ! \in_array( $_GET['log-file'], $files ) ) { ?>
+			$file = str_replace( '\\\\', '\\', $_GET['log-file'] );
+			if ( ! \in_array( $file, $files ) ) { ?>
                 <p><?php
 					_e( 'File not found, cheating, huh?', 'wpify-log' );
 					?></p>
@@ -72,7 +77,7 @@ class Tools {
 						<?php foreach ( $logs as $log ) { ?>
                             <tr>
 								<?php foreach ( $log as $item ) { ?>
-                                    <td><?php echo is_array($item) ? json_encode($item) : $item; ?></td>
+                                    <td><?php echo is_array( $item ) ? json_encode( $item ) : $item; ?></td>
 								<?php } ?>
                             </tr>
 						<?php } ?>
