@@ -199,4 +199,11 @@ class Log {
 	public function push_handler( HandlerInterface $handler ) {
 		$this->logger->pushHandler( $handler );
 	}
+
+	/**
+	 * @return Logger
+	 */
+	public function get_logger(): Logger {
+		return $this->logger;
+	}
 }
