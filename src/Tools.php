@@ -8,7 +8,7 @@ class Tools {
 	public function __construct( array $menu_args = [] ) {
 		$this->menu_args = $menu_args;
 
-		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
+		add_action( 'admin_menu', [ $this, 'add_menu_page' ], 99 );
 	}
 
 	public function add_menu_page() {
@@ -18,7 +18,8 @@ class Tools {
 			$this->menu_args['menu_title'] ?? __( 'WPify Logs', 'wpify-log' ),
 			$this->menu_args['capability'] ?? 'read',
 			$this->menu_args['menu_slug'] ?? 'wpify-logs',
-			[ $this, 'logs_screen' ]
+			[ $this, 'logs_screen' ],
+            109
 		);
 	}
 
