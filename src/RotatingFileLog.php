@@ -24,7 +24,8 @@ class RotatingFileLog extends Log {
 			$path = sprintf( '%s_%s.log', $path, hash( 'md5', $key ) );
 		}
 
-		$handler = new RotatingFileHandler( $path, 5, Logger::DEBUG, true, 0660 );
+		$max_files = get_option('wpify_logs_max_files', 5);
+		$handler = new RotatingFileHandler($path, $max_files, Logger::DEBUG, \true, 0660);
 		$handler->setFormatter( $formatter ?? new JsonFormatter() );
 		parent::__construct( $channel, [ $handler ], $menu_args );
 	}
