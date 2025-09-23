@@ -2,17 +2,14 @@
 
 namespace Wpify\Log;
 
-use Monolog\Handler\HandlerInterface;
-use Monolog\Logger;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 
-class Log {
-	/**
-	 * @var Logger
-	 */
-	private $logger;
+class Log extends AbstractLogger implements LoggerInterface {
 	private $channel;
 	private $handlers;
 	private $menu_args;
+	private $wc_logger = null;
 
 	/**
 	 * Detailed debug information
@@ -51,7 +48,6 @@ class Log {
 	/**
 	 * Action must be taken immediately
 	 * Example: Entire website down, database unavailable, etc.
-	 * This should trigger the SMS alerts and wake you up.
 	 */
 	public const ALERT = 550;
 
@@ -60,39 +56,22 @@ class Log {
 	 */
 	public const EMERGENCY = 600;
 
-	/**
-	 * @param  string  $channel
-	 * @param  array  $handlers
-	 * @param  array  $menu_args
-	 */
 	public function __construct( string $channel, array $handlers = [], array $menu_args = [] ) {
-		$this->channel  = $channel;
-		$this->handlers = $handlers;
+		$this->channel   = $channel;
+		$this->handlers  = $handlers;
 		$this->menu_args = $menu_args;
-		$this->logger   = new Logger( $this->channel );
 
-		foreach ( $handlers as $handler ) {
-			$this->logger->pushHandler( $handler );
+		if ( function_exists( 'wc_get_logger' ) ) {
+			$this->wc_logger = wc_get_logger();
 		}
 
-		$levels = [
-			'debug',
-			'info',
-			'notice',
-			'warning',
-			'error',
-			'critical',
-			'alert',
-			'emergency',
-		];
-
+		$levels = [ 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency' ];
 		foreach ( $levels as $level ) {
 			add_action( "wpify_log_{$this->channel}_{$level}", [ $this, $level ], 10, 2 );
 		}
 
 		add_filter( 'wpify_logs', function ( $logs ) {
-			$logs[ $this->channel ] = $this->logger;
-
+			$logs[ $this->channel ] = $this; // Expose this instance to Tools
 			return $logs;
 		} );
 
@@ -100,113 +79,95 @@ class Log {
 			add_filter( 'wpify_log_tools_initialized', '__return_true' );
 			new Tools( $this->menu_args );
 		}
-
 	}
 
-	/**
-	 * @param $message
-	 * @param $data
-	 *
-	 * @return void
-	 */
-	public function debug( $message, array $data = [] ) {
-		$this->logger->debug( $message, $data );
+	public function debug( $message, array $data = [] ) { $this->log( 'debug', $message, $data ); }
+	public function info( $message, array $data = [] ) { $this->log( 'info', $message, $data ); }
+	public function notice( $message, array $data = [] ) { $this->log( 'notice', $message, $data ); }
+	public function warning( $message, array $data = [] ) { $this->log( 'warning', $message, $data ); }
+	public function error( $message, array $data = [] ) { $this->log( 'error', $message, $data ); }
+	public function critical( $message, array $data = [] ) { $this->log( 'critical', $message, $data ); }
+	public function alert( $message, array $data = [] ) { $this->log( 'alert', $message, $data ); }
+	public function emergency( $message, array $data = [] ) { $this->log( 'emergency', $message, $data ); }
+
+	public function get_channel(): string { return $this->channel; }
+	public function get_handlers(): array { return $this->handlers; }
+	public function getHandlers(): array { return $this->handlers; }
+
+	public function log( $level, $message, array $context = [] ): void {
+		$level_name = $this->normalizeLevelName( $level );
+		if ( $this->wc_logger ) {
+			$ctx = array_merge( $context, [ 'source' => $this->channel ] );
+			$this->wc_logger->log( $level_name, $this->interpolate( (string) $message, $context ), $ctx );
+			return;
+		}
+
+		foreach ( $this->handlers as $handler ) {
+			if ( method_exists( $handler, 'write' ) ) {
+				$record = [
+					'message'    => (string) $this->interpolate( (string) $message, $context ),
+					'context'    => $context,
+					'level'      => $this->levelNameToNumber( $level_name ),
+					'level_name' => strtoupper( $level_name ),
+					'channel'    => $this->channel,
+					'datetime'   => date( 'c' ),
+					'extra'      => [],
+				];
+				$handler->write( $record );
+			}
+		}
 	}
 
-	/**
-	 * @param $message
-	 * @param $data
-	 *
-	 * @return void
-	 */
-	public function info( $message, array $data = [] ) {
-		$this->logger->info( $message, $data );
+	private function normalizeLevelName( $level ): string {
+		if ( is_int( $level ) ) {
+			return $this->levelNumberToName( $level );
+		}
+		$level = strtolower( (string) $level );
+		$valid = [ 'debug','info','notice','warning','error','critical','alert','emergency' ];
+		return in_array( $level, $valid, true ) ? $level : 'debug';
 	}
 
-	/**
-	 * @param $message
-	 * @param $data
-	 *
-	 * @return void
-	 */
-
-	public function notice( $message, array $data = [] ) {
-		$this->logger->notice( $message, $data );
+	private function levelNumberToName( int $level ): string {
+		$map = [
+			self::DEBUG => 'debug',
+			self::INFO => 'info',
+			self::NOTICE => 'notice',
+			self::WARNING => 'warning',
+			self::ERROR => 'error',
+			self::CRITICAL => 'critical',
+			self::ALERT => 'alert',
+			self::EMERGENCY => 'emergency',
+		];
+		return $map[ $level ] ?? 'debug';
 	}
 
-	/**
-	 * @param $message
-	 * @param  array  $data
-	 *
-	 * @return void
-	 */
-	public function warning( $message, array $data = array() ) {
-		$this->logger->warning( $message, $data );
+	private function levelNameToNumber( string $level ): int {
+		$map = [
+			'debug' => self::DEBUG,
+			'info' => self::INFO,
+			'notice' => self::NOTICE,
+			'warning' => self::WARNING,
+			'error' => self::ERROR,
+			'critical' => self::CRITICAL,
+			'alert' => self::ALERT,
+			'emergency' => self::EMERGENCY,
+		];
+		return $map[ strtolower( $level ) ] ?? self::DEBUG;
 	}
 
-	/**
-	 * @param $message
-	 * @param  array  $data
-	 *
-	 * @return void
-	 */
-	public function error( $message, array $data = [] ) {
-		$this->logger->error( $message, $data );
-	}
-
-
-	/**
-	 * @param $message
-	 * @param $data
-	 *
-	 * @return void
-	 */
-	public function critical( $message, array $data = [] ) {
-		$this->logger->critical( $message, $data );
-	}
-
-	/**
-	 * @param $message
-	 * @param  array  $data
-	 *
-	 * @return void
-	 */
-	public function alert( $message, array $data = [] ) {
-		$this->logger->alert( $message, $data );
-	}
-
-	/**
-	 * @param $message
-	 * @param  array  $data
-	 *
-	 * @return void
-	 */
-	public function emergency( $message, array $data = [] ) {
-		$this->logger->emergency( $message, $data );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function get_channel(): string {
-		return $this->channel;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function get_handlers(): array {
-		return $this->handlers;
-	}
-
-	public function push_handler( HandlerInterface $handler ) {
-		$this->logger->pushHandler( $handler );
-	}
-
-	/**
-	 * @return Logger
-	 */
-	public function get_logger(): Logger {
-		return $this->logger;
+	private function interpolate( string $message, array $context ): string {
+		if ( strpos( $message, '{' ) === false ) {
+			return $message;
+		}
+		$replacements = [];
+		foreach ( $context as $key => $val ) {
+			if ( is_null( $val ) || is_scalar( $val ) || ( is_object( $val ) && method_exists( $val, '__toString' ) ) ) {
+				$replacements[ '{' . $key . '}' ] = (string) $val;
+			} else {
+				$replacements[ '{' . $key . '}' ] = json_encode( $val );
+			}
+		}
+		return strtr( $message, $replacements );
 	}
 }
+
