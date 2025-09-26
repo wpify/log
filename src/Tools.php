@@ -98,7 +98,7 @@ class Tools {
 						?>
                     </select>
                 </div>
-                <input type="hidden" name="page" value="<?php echo $this->menu_args['menu_slug'] ?? 'wpify-logs'; ?>"/>/>
+                <input type="hidden" name="page" value="<?php echo $this->menu_args['menu_slug'] ?? 'wpify-logs'; ?>"/>
                 <input class="button" type="submit" value="Display log"/>
             </form>
         </div>
