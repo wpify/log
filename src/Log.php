@@ -66,7 +66,7 @@ class Log extends AbstractLogger implements LoggerInterface {
 			$this->wc_logger = wc_get_logger();
 		}
 
-		$this->use_wc_logger = apply_filters( 'wpify_log_use_wc_logger', $this->wc_logger && empty ( $this->menu_args['parent_slug'] ) );
+		$this->use_wc_logger = apply_filters( 'wpify_log_use_wc_logger', $this->wc_logger && empty ( $this->menu_args['parent_slug'] ), $channel );
 
 		$levels = [ 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency' ];
 		foreach ( $levels as $level ) {
