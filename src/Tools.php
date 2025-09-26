@@ -59,7 +59,7 @@ class Tools {
             }
         </style>
         <div class="wrap">
-            <h2><?php _e( 'WPify Logs', 'wpify-log' ); ?></h2>
+            <h2><?php echo $this->menu_args['page_title'] ?? __('WPify Logs', 'wpify-log'); ?></h2>
 
             <form action="" style="justify-content: start; margin-bottom: 20px;gap: 10px">
                 <div class="wpifycf-select">
@@ -98,7 +98,7 @@ class Tools {
 						?>
                     </select>
                 </div>
-                <input type="hidden" name="page" value="wpify-logs"/>
+                <input type="hidden" name="page" value="<?php echo $this->menu_args['menu_slug'] ?? 'wpify-logs'; ?>"/>/>
                 <input class="button" type="submit" value="Display log"/>
             </form>
         </div>
