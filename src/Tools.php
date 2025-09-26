@@ -129,6 +129,9 @@ class Tools {
                             <tr>
 								<?php
 								foreach ( $header as $item ) {
+                                    if ( in_array( $item, [ 'channel', 'extra' ] )) {
+                                        continue;
+                                    }
 									?>
                                     <th style="width: <?= $this->column_width( $item ) ?>"><?php
 										echo $item;
@@ -145,6 +148,9 @@ class Tools {
                                 <tr>
 									<?php
 									foreach ( $log as $key => $item ) {
+										if ( in_array( $key, [ 'channel', 'extra' ] )) {
+											continue;
+										}
 										?>
                                         <td style="width: <?= $this->column_width( $key ) ?>"><?php
 											$this->pretty_print_log_item( $item );
