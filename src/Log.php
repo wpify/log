@@ -84,7 +84,7 @@ class Log extends AbstractLogger implements LoggerInterface {
 			$tools_slug = $this->menu_args['menu_slug'];
 		}
 
-		if ( ! $this->use_wc_logger || ! apply_filters( $tools_slug . '_log_tools_initialized', false ) ) {
+		if ( ! $this->use_wc_logger && ! apply_filters( $tools_slug . '_log_tools_initialized', false ) ) {
 			add_filter( $tools_slug . '_log_tools_initialized', '__return_true' );
 			new Tools( $this->menu_args );
 		}
